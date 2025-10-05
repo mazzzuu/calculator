@@ -17,16 +17,37 @@ function reducer(state: any,{type,payload}: any){
       if(payload.digit === "." && state.currentOperand.includes(".")) return state;
       return {
         ...state,
-        currentOperand: `${ state.currentOperand || ""} ${payload.digit}`
+        currentOperand: `${ state.currentOperand || ""}${payload.digit}`
       }
 
     case ACTIONS.CHOOSE_OPERATIONS :
-      if(payload.current == null && state.previousOperand == null) return state;
-      return state;
+      if(state.currentOperand==null && state.previousOperand ==null){
+        return state;
+      }
+      if(state.currentOperand == null){
+        return{
+          ...state,
+          currentOperand: payload.operation
+        }
+      }
+      if(state.currentOperand!=null){
+        return{
+          ...state,
+          operation: payload.operation,
+          previousOperand: state.currentOperand,
+          currentOperand : null
+        }
+      }
+      return{
+        ...state,
+        operation:payload.operation,
+        previousOperand: evaluate(state),
+        currentOperand : null
+      }
     case ACTIONS.CLEAR :
       return {}
     case ACTIONS.DELETE:
-      return payload.slice(0,state.currentOperand)
+      return{}
     case ACTIONS.EVALUATE :
   }
 }
@@ -72,21 +93,26 @@ export default function main() {
 }
 
 
-// <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2">AC</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >DEL</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >/</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >1</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >2</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >3</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >*</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >4</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >5</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >6</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >-</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >7</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >8</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >9</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >+</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >.</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >0</DigitButton>
-//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2" >=</DigitButton>
+
+function evaluate({currentOperand,previousOperand,operand}:any) {
+  const curr = parseFloat(currentOperand)
+  const prev = parseFloat(previousOperand)
+  if(isNaN(curr) || isNaN(prev))
+    return "errorone"
+  let computaion 
+    switch(operand){
+      case "+":
+        computaion = prev+curr;
+        break;
+      case "-":
+        computaion = prev-curr;
+        break;
+      case "/":
+        computaion = prev/curr;
+        break;
+      case "*":
+        computaion = prev*curr;
+        break;
+    }
+  return computaion?.toString();
+}
