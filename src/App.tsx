@@ -1,4 +1,40 @@
+import { useReducer } from "react";
+import DigitButton from "./DigitButton";
+import OperationButton from "./OperationButton";
+
+export const ACTIONS = {
+  ADD_DIGIT :'add-digit',
+  CHOOSE_OPERATIONS:'choose-operations',
+  EVALUATE:'evaluate',
+  CLEAR :'clear',
+  DELETE : 'delete-digit'
+}
+
+function reducer(state: any,{type,payload}: any){
+  switch(type){
+    case ACTIONS.ADD_DIGIT :
+      if(payload.digit === "0" && state.currentOperand === "0") return state;
+      if(payload.digit === "." && state.currentOperand.includes(".")) return state;
+      return {
+        ...state,
+        currentOperand: `${ state.currentOperand || ""} ${payload.digit}`
+      }
+
+    case ACTIONS.CHOOSE_OPERATIONS :
+      if(payload.current == null && state.previousOperand == null) return state;
+      return state;
+    case ACTIONS.CLEAR :
+      return {}
+    case ACTIONS.DELETE:
+      return payload.slice(0,state.currentOperand)
+    case ACTIONS.EVALUATE :
+  }
+}
+
 export default function main() {
+  const[ {currentOperand,previousOperand,operation} ,dispatch] = useReducer(reducer, {})
+
+
   return (
     <>
     {/* metto lo sfondo e dispondo la poszione  */}
@@ -7,34 +43,50 @@ export default function main() {
         <div className="calcolatrice m-16 grid grid-cols-4 grid-rows-6 object-center border-2 h-[600px] w-[500px] break-words ">
           {/* classe output con sfondo blac opacizzato al 75% li metto in colonna e li metto alla fine con uno spazio tra i due e metto che è grande 4 colonne */}
           <div className="output bg-black/75 flex flex-col items-end justify-around col-span-4 p-3">
-            <div className="primo-operando white text-white opacity-75 text-2xl "></div>
-            <div className="secondo-operando text-white text-4xl "></div>
+            <div className="previous-operand white text-white opacity-75 text-2xl ">{previousOperand} {operation}</div>
+            <div className="current-operand text-white text-4xl ">{currentOperand}</div>
           </div>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2" onClick={()=>stampa("AC")}>AC</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("DEL")}>DEL</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("/")}>/</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("1")}>1</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("2")}>2</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("3")}>3</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("*")}>*</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("4")}>4</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("5")}>5</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("6")}>6</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("-")}>-</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("7")}>7</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("8")}>8</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("9")}>9</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("+")}>+</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa(".")}>.</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" onClick={()=>stampa("0")}>0</button>
-          <button className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2" onClick={()=>stampa("=")}>=</button>
+          <button onClick={()=> dispatch({type: ACTIONS.CLEAR})} 
+          className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2">AC</button>
+          <button onClick={()=> dispatch({type: ACTIONS.DELETE})} className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >DEL</button>
+          <OperationButton dispatch={dispatch} operation="/"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" ></OperationButton>
+          <DigitButton dispatch={dispatch} digit="1"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >1</DigitButton>
+          <DigitButton dispatch={dispatch} digit="2"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >2</DigitButton>
+          <DigitButton dispatch={dispatch} digit="3"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >3</DigitButton>
+          <OperationButton dispatch={dispatch} operation="*"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >*</OperationButton>
+          <DigitButton dispatch={dispatch} digit="4"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >4</DigitButton>
+          <DigitButton dispatch={dispatch} digit="5"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >5</DigitButton>
+          <DigitButton dispatch={dispatch} digit="6"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >6</DigitButton>
+          <OperationButton dispatch={dispatch} operation="-"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >-</OperationButton>
+          <DigitButton dispatch={dispatch} digit="7"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >7</DigitButton>
+          <DigitButton dispatch={dispatch} digit="8"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >8</DigitButton>
+          <DigitButton dispatch={dispatch} digit="9"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >9</DigitButton>
+          <OperationButton dispatch={dispatch} operation="+"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >+</OperationButton>
+          <DigitButton dispatch={dispatch} digit="."  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >.</DigitButton>
+          <DigitButton dispatch={dispatch} digit="0"  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >0</DigitButton>
+          <OperationButton dispatch={dispatch} operation="="  style="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2" >=</OperationButton>
         </div>
       </div>
     </>
   );
 }
 
-function stampa(carattere : string) {
-  console.log(carattere)
-  return null;
-}
+
+// <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2">AC</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >DEL</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >/</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >1</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >2</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >3</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >*</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >4</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >5</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >6</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >-</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >7</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >8</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >9</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >+</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >.</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none" >0</DigitButton>
+//           <DigitButton className="cursor-pointer bg-white/75 text-[2rem] border-white border-[1px] hover:bg-white/45 focus:bg-white/45 outline-none col-span-2" >=</DigitButton>
